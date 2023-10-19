@@ -1,0 +1,3 @@
+SECRET_KEY = '[Your Own Secret Key]'
+MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoicHJhdmVlbjI4NCIsImEiOiJjbG5uM3JkeXUwMmI2MmlwMXNuZ2p1YTNsIn0.OzT6yw5z1Ro2Nkfn3cKN5Q'
+GOOGLE_API_KEY = '[Your Google API Key]'

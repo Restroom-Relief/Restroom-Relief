@@ -1,0 +1,46 @@
+#hero-container {
+  padding: 135px 0;
+  background-color: #4e73df; /* Keep this if you want to maintain the blue hero section. */
+}
+
+/* To match the purple background from the screenshot */
+body, .navbar, footer {
+  background-color: #6C63FF;
+}
+
+/* Making text color white to contrast the purple background */
+body, h1, h2, p, li, .navbar-brand, .navbar-nav .nav-link {
+  color: #ffffff;
+}
+
+/* Navbar styling to resemble the screenshot */
+.navbar {
+  border-bottom: 2px solid #ffffff;
+}
+
+.navbar-toggler-icon {
+  filter: invert(100%);
+}
+
+/* Styling the form button to resemble the "SignUp" button in the screenshot */
+#register-button {
+  background-color: #ffffff;
+  color: #6C63FF;
+  border: none;
+  padding: 10px 30px;
+  font-weight: bold;
+}
+
+section {
+  padding: 100px 0;
+}
+
+.hero-text {
+  max-width: 800px;
+  margin: 0 auto 1rem;
+}
+
+#features li {
+  margin-bottom: 10px;
+}
+

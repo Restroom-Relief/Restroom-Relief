@@ -1,0 +1,355 @@
+{% extends 'base.html' %} {% block content %}
+
+<div id="search-container" class="col mt-3 px-0">
+  <div
+    id="search-form"
+    {%
+    if
+    default
+    %}
+    data-default-id="{{default.id}}"
+    {%
+    endif
+    %}
+  >
+    <div
+      id="saved-searches-container"
+      class="row d-flex align-items-center justify-content-between mb-2"
+    >
+      <div class="col col-12 col-md-7 d-flex align-items-center mb-1">
+        <button class="btn btn-sm btn-info" type="button" id="menu-toggle">
+          Saved Searches
+        </button>
+      </div>
+    </div>
+    <div class="form-group" id="location-search-container">
+      <div id="geocoder" class="geocoder"></div>
+    </div>
+
+    <div class="row d-flex justify-content-between">
+      <div class="col col-12 col-md-7 form-group">
+        <div class="form-check form-check-inline">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="accessible"
+            value="accessible"
+          />
+          <label class="form-check-label" for="accessible"
+            >Accessible <i class="fas fa-wheelchair ml-1"></i
+          ></label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="unisex"
+            value="unisex"
+          />
+          <label class="form-check-label" for="unisex"
+            >Unisex <i class="fas fa-genderless ml-1"></i
+          ></label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="changing-table"
+            value="changing-table"
+          />
+          <label class="form-check-label" for="changing-table"
+            >Changing Table <i class="fas fa-baby ml-1"></i
+          ></label>
+        </div>
+      </div>
+
+      <div class="col mb-2 mb-0-md">
+        <div class="d-flex flex-md-row-reverse">
+          <button
+            id="search-button"
+            class="btn btn-sm btn-primary"
+            type="submit"
+            data-toggle="modal"
+          >
+            Search
+          </button>
+          <div class="form-check form-check-inline ml-2">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="save-search"
+              value="save-search"
+            />
+            <label class="form-check-label" for="save-search"
+              >Save Search</label
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobile-spinner-container"></div>
+  <div
+    id="restroom-container"
+    class="row d-flex flex-column-reverse flex-md-row mt-2"
+  >
+    <div id="results-container" class="col pr-md-0">
+      <div id="spinner-container"></div>
+      <ul id="search-results" class="list-group"></ul>
+    </div>
+    <div id="map-container" class="col col-12">
+      <div id="map" style="width: 100%; height: 400px"></div>
+      <div id="menu" class="float-right">
+        <input
+          id="streets-v11"
+          type="radio"
+          name="rtoggle"
+          value="streets"
+          checked="checked"
+        />
+        <label for="streets-v11">streets</label>
+        <input id="light-v10" type="radio" name="rtoggle" value="light" />
+        <label for="light-v10">light</label>
+        <input id="dark-v10" type="radio" name="rtoggle" value="dark" />
+        <label for="dark-v10">dark</label>
+        <input id="outdoors-v11" type="radio" name="rtoggle" value="outdoors" />
+        <label for="outdoors-v11">outdoors</label>
+        <input
+          id="satellite-v9"
+          type="radio"
+          name="rtoggle"
+          value="satellite"
+        />
+        <label for="satellite-v9">satellite</label>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mapboxgl.accessToken = '{{token}}';
+  </script>
+
+  <div
+    class="modal fade"
+    id="restrooms-modal"
+    tabindex="-1"
+    aria-labelledby="restrooms"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title"></span>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="saved-search-modal"
+    tabindex="-1"
+    aria-labelledby="saved-search"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Save Search</h5>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="search-name">Search Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="search-name"
+                required
+              />
+            </div>
+            <div class="form-group form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="default-search"
+              />
+              <label class="form-check-label" for="default-search"
+                >Default search to use</label
+              >
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+          <button
+            id="save-search-button"
+            type="button"
+            class="btn btn-primary"
+            data-dismiss="modal"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="edit-saved-search-modal"
+    tabindex="-1"
+    aria-labelledby="edit-saved-search-modal"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title">
+            <h5>Edit Saved Search</h5>
+          </div>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="edit-search-name">Search Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="edit-search-name"
+                required
+              />
+            </div>
+            <div class="form-group form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="edit-default-search"
+              />
+              <label class="form-check-label" for="default-search"
+                >Default search to use</label
+              >
+            </div>
+            <div class="form-group form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="edit-accessible"
+              />
+              <label class="form-check-label" for="edit-accessible"
+                >Accessible</label
+              >
+            </div>
+            <div class="form-group form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="edit-unisex"
+              />
+              <label class="form-check-label" for="edit-unisex">Unisex</label>
+            </div>
+            <div class="form-group form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="edit-changing-table"
+              />
+              <label class="form-check-label" for="edit-changing-table"
+                >Changing Table</label
+              >
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+          <a
+            id="edit-save-search-button"
+            type="button"
+            class="btn btn-primary"
+            data-dismiss="modal"
+          >
+            Save
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="delete-saved-search-modal"
+    tabindex="-1"
+    aria-labelledby="delete-saved-search-modal"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title">
+            <h5>Delete Saved Search</h5>
+          </div>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this Saved Search?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+          <a
+            id="delete-save-search-button"
+            type="button"
+            class="btn btn-danger"
+            data-dismiss="modal"
+          >
+            Delete
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
