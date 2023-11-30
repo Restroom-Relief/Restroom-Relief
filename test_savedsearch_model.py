@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from models import db, User, SavedSearch
 
 from app import app
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:pass@localhost:5432/restroom-finder-test'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:pass@localhost:5432/restroom-finder'
 
 
 db.create_all()

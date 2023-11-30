@@ -25,6 +25,9 @@
 
     <!-- Custom styles for this template -->
     <link href="/static/css/landing.css" rel="stylesheet" />
+    
+    <!-- Google Translate API -->
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   </head>
 
   <body id="page-top">
@@ -106,12 +109,14 @@
       </div>
     </section>
 
+    <!-- Google Translate Widget -->
+    <div id="google_translate_element"></div>
+
     <!-- Footer -->
     <footer class="py-5 bg-dark">
       <div class="container">
-        
+        <!-- Add your footer content here -->
       </div>
-      <!-- /.container -->
     </footer>
 
     <script
@@ -124,5 +129,19 @@
       integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
       crossorigin="anonymous"
     ></script>
+
+    <!-- Google Translate Initialization -->
+    <script>
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: 'en', // Set the default language of your page
+            includedLanguages: 'en,es,fr', // Set the languages you want to include in the translation dropdown
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          },
+          'google_translate_element'
+        );
+      }
+    </script>
   </body>
 </html>

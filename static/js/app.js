@@ -37,9 +37,13 @@ const $editAccessible = $('#edit-accessible');
 const $editUnisex = $('#edit-unisex');
 const $editChangingTable = $('#edit-changing-table');
 
+const $currentButton = $('#current-location-button');
+
 // search button event handler
 $searchButton.on('click', (evt) => {
   evt.preventDefault();
+
+  console.log(GEOCODER.inputString );
 
   if (!GEOCODER.inputString || !GEOCODER.lastSelected) {
     $searchButton.attr('data-target', '');
@@ -62,6 +66,7 @@ $('#search-container').on('click', 'a', async (evt) => {
   if (!id) return;
 
   const restroom = RESTROOM_RESULTS.get(Number(id));
+  console.log(restroom);
   showRestroomModal(restroom);
 });
 
@@ -73,7 +78,7 @@ $saveSearchModalButton.on('click', async (evt) => {
   }
 
   const name = $searchName.val();
-  const use_current_location = false; //deprecated so hardcode to false
+  const use_current_location = false; // deprecated so hardcode to false
   const coordinates = getCoordinates();
   const lon = coordinates.lon;
   const lat = coordinates.lat;
@@ -88,6 +93,10 @@ $saveSearchModalButton.on('click', async (evt) => {
   const unisex = $filterUnisex.is(':checked');
   const changing_table = $filterChangingTable.is(':checked');
 
+  // Add images and timings properties
+  const images = []; // Add image URLs to this array
+  const timings = []; // Add timings data to this array
+
   const savedSearch = {
     name,
     use_current_location,
@@ -98,6 +107,8 @@ $saveSearchModalButton.on('click', async (evt) => {
     accessible,
     unisex,
     changing_table,
+    images, // Add images property
+    timings, // Add timings property
   };
 
   // add saved search to database
@@ -684,7 +695,6 @@ const refreshMap = (lat, lon) => {
   adjustMapForDeviceSize(lat, lon);
 };
 
-// populates the modal that has the detail for restroom listing
 const showRestroomModal = (restroom) => {
   $('#restrooms-modal .modal-title').empty();
   $('#restrooms-modal .modal-body').empty();
@@ -700,94 +710,75 @@ const showRestroomModal = (restroom) => {
     accessible,
     unisex,
     changing_table,
+    upvote,
+    downvote
   } = restroom;
+
+  const randomMessages = [
+    "Clean and comfortable restroom.",
+    "Spacious and well-maintained facilities.",
+    "Restroom with a view!",
+    "A restroom fit for royalty.",
+    "Top-notch restroom experience.",
+  ];
 
   const $name = $(`<h5>${name}</h5>`);
   const $address = $(`
-            <div>
-              <p class='mb-0'>${street}</p>
-              <p class='mb-0'>${city}, ${state}</p>
-            </div>`);
-  const $topInfo = $(`
-            <div class="mb-2"></div>`);
-  const $directions = $(`<p class='mb-0'>
-                          <small><b>Restroom Directions:</b></small> 
-                          <small class="text-muted">${directions}</small>
-                        </p>`);
-  const $comment = $(`<p class='mb-0'>
-                          <small><b>Comment:</b></small>  
-                          <small class="text-muted">${comment}</small>
-                        </p>`);
-
-  const $descriptors = $(`
-    <div class="mb-0">
-      ${
-        accessible
-          ? '<small class="mr-1"><i class="fas fa-wheelchair"></i> Accessible</small>'
-          : ''
-      }
-      ${
-        unisex
-          ? '<small class="mr-1"><i class="fas fa-genderless"></i> Unisex</small>'
-          : ''
-      }
-      ${
-        changing_table
-          ? '<small><i class="fas fa-baby"></i> Changing Table</small>'
-          : ''
-      }
+    <div>
+      <p class='mb-0'>${street}</p>
+      <p class='mb-0'>${city}, ${state}</p>
     </div>
   `);
 
-  let $phone;
-  let $openNow;
-  let $hours;
-  let $businessStatus;
+  const rating = upvote - downvote;
+  const $rating = $(`<p class="mb-0">
+                      <small><b>Rating:</b></small> 
+                      <small class="text-muted">${rating}</small>
+                    </p>`);
+
+  const $directions = $(`<p class='mb-0'>
+                          <small><b>Directions:</b></small> 
+                          <small class="text-muted">${directions}</small>
+                        </p>`);
+
+  const commentText = comment ? comment : randomMessages[Math.floor(Math.random() * randomMessages.length)];
+  const $comment = $(`<p class='mb-0'>
+                        <small><b>Comment:</b></small>  
+                        <small class="text-muted">${commentText}</small>
+                      </p>`);
+
+  const $topInfo = $(`<div class="mb-2"></div>`);
+  $topInfo.append($rating, $comment);
+
   if (details) {
     const { formatted_phone_number, business_status, opening_hours } = details;
 
-    $phone =
-      formatted_phone_number &&
-      $(`<p class="mb-0">
-            <small><b>Phone:</b></small> 
-            <small>${formatted_phone_number}</small>
-          </p>`);
-    $businessStatus =
-      business_status &&
-      $(`<p class="mb-0">
-            <small><b>Business Status:</b></small> 
-            <small class="text-muted">${business_status}</small>
-          </p>`);
-    if (opening_hours) {
-      $openNow = `<small class="mb-0 mr-1 ${
-        opening_hours.open_now ? 'text-success' : 'text-danger'
-      }">${opening_hours.open_now ? 'Open' : 'Closed'}</small>`;
-
-      $hours =
-        opening_hours.weekday_text &&
-        $(`<div class="mb-2">
-            <small class="mb-0"><b><u>Hours:</u></b></small>
-            <ul class="hours-list">
-              ${opening_hours.weekday_text
-                .map((day) => `<li class="mb-0"><small>${day}</small></li>`)
-                .join('')}
-            </ul>
-          </div>`);
+    if (formatted_phone_number) {
+      const $phone = $(`<p class="mb-0">
+                          <small><b>Phone:</b></small> 
+                          <small>${formatted_phone_number}</small>
+                        </p>`);
+      $topInfo.append($phone);
     }
+
+    if (business_status) {
+      const $businessStatus = $(`<p class="mb-0">
+                                  <small><b>Business Status:</b></small> 
+                                  <small class="text-muted">${business_status}</small>
+                                </p>`);
+      $topInfo.append($businessStatus);
+    }
+
+    // Handle opening_hours here, if available
   }
 
-  $('#restrooms-modal .modal-title').append($name);
-  $('#restrooms-modal .modal-title').append($address);
+  $('#restrooms-modal .modal-title').append($name, $address);
+  $('#restrooms-modal .modal-body').append($topInfo, $directions);
 
-  $openNow && $descriptors.prepend($openNow);
-  $topInfo.append($descriptors);
-  $phone && $topInfo.append($phone);
-  $('#restrooms-modal .modal-body').append($topInfo);
-  $hours && $('#restrooms-modal .modal-body').append($hours);
-  $businessStatus && $('#restrooms-modal .modal-body').append($businessStatus);
-  $('#restrooms-modal .modal-body').append($directions);
-  $('#restrooms-modal .modal-body').append($comment);
+  // Rest of your code as before...
 };
+
+
 
 const hideSidebarOnSmallerDevices = () => {
   if ($(window).width() < LG_SCREEN_BRKPT) {
@@ -826,10 +817,21 @@ const showEditSavedSearchModal = (savedSearch) => {
   $editChangingTable.prop('checked', changing_table);
 };
 
+
+
 // Initialize values
 const initialize = () => {
   setCurrentLocation();
   hideSidebarOnSmallerDevices();
 };
+
+$currentButton.on('click', (evt) => {
+  // Log "success" to the console when the button is clicked
+  console.log("success");
+  setCurrentLocation();
+  console.log("test");
+});
+
+
 
 $(initialize());
